@@ -1,0 +1,45 @@
+{
+  "name": "treetransfer",
+  "version": "1.0.0",
+  "description": "简单的tree形式的穿梭框",
+  "scripts": {
+    "build": "webpack",
+    "start": "webpack-dev-server --open"
+  },
+  "author": "dyx",
+  "devDependencies": {
+    "autoprefixer": "^9.6.1",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-plugin-import": "^1.12.0",
+    "babel-plugin-transform-decorators-legacy": "^1.3.5",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "clean-webpack-plugin": "^3.0.0",
+    "css-loader": "^1.0.0",
+    "file-loader": "^4.1.0",
+    "less": "^3.8.1",
+    "less-loader": "^4.1.0",
+    "postcss-loader": "^3.0.0",
+    "react-hot-loader": "^4.3.5",
+    "style-loader": "^0.22.1",
+    "url-loader": "^2.1.0",
+    "webpack": "^4.17.1",
+    "webpack-cli": "^3.1.0",
+    "webpack-dev-server": "^3.1.7"
+  },
+  "dependencies": {
+    "antd": "^3.8.4",
+    "lodash": "^4.17.11",
+    "moment": "^2.24.0",
+    "prop-types": "^15.7.2",
+    "react": "^16.4.2",
+    "react-css-modules": "^4.7.11",
+    "react-dom": "^16.4.2",
+    "react-redux": "^5.0.6",
+    "react-router-dom": "^4.3.1",
+    "redux": "^3.7.2"
+  }
+}
