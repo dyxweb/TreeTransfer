@@ -6,28 +6,23 @@ import { Input, Tree, Button, Icon, Checkbox } from 'antd';
 import styles from './index.less';
 
 const { Search } = Input;
-const isLastLevelKey = (categoryData, key) => {
-  let flag = false; // 返回的标识
-  let findFlag = false; // 是否找到的标识
+const isLastLevelKey = (dataSource, key) => {
+  let flag = false;
   const deep = data => {
-    for(let i = 0; i < data.length; i++) {
-      if (findFlag) {
-        break;
-      }
-      if (data[i].key === key) {
-        findFlag = true;
-        if(Array.isArray(data[i].children) && data[i].children.length > 0) {
-          break;
-        } else {
+    return data.some(item => {
+      if (item.id === key ) {
+        if (!item.children || item.children.length <= 0) {
           flag = true;
-          break;
+          return true;
+        } else {
+          return deep(item.children)
         }
-      } else if (Array.isArray(data[i].children) && data[i].children.length > 0) {
-        deep(data[i].children);
+      } else if (item.children && item.children.length > 0) {
+        return deep(item.children)
       }
-    }
-  };
-  deep(categoryData);
+    })
+  }
+  deep(dataSource)
   return flag;
 };
 
@@ -246,6 +241,7 @@ export default class TreeTransfer extends Component {
           keys: [],
           matchedKeys: [],
           checkedKeys: [],
+          selectDataSource: [],
         },
         rightTree: {
           ...this.state.rightTree,
