@@ -10,7 +10,7 @@ const isLastLevelKey = (dataSource, key) => {
   let flag = false;
   const deep = data => {
     return data.some(item => {
-      if (item.id === key ) {
+      if (item.key === key ) {
         if (!item.children || item.children.length <= 0) {
           flag = true;
           return true;
@@ -68,7 +68,7 @@ export default class TreeTransfer extends Component {
         dataSource: [], // 展示的数据
         selectDataSource: [], // 选中的产品数据
         filterSelectDataSource: [], // 去除选中的产品数据
-        keys: [], // 选中的keys
+        keys: [], // 选中的keys(和checkedKeys相同)
         expandedKeys: [], // 展开的项
         autoExpandParent: true, // 自动展开父节点
         matchedKeys: [], // 匹配搜索内容的数据
@@ -82,7 +82,7 @@ export default class TreeTransfer extends Component {
   }
 
   componentWillReceiveProps(newProps) {
-    // 编辑状态下生成树形数据结构
+    // 编辑状态下生成树形数据结构（当选择项和数据源改变时重新计算数据）
     if (!_.isEqual(newProps.values, this.props.values) ||
       !_.isEqual(newProps.dataSource, this.props.dataSource)
     ) {
@@ -94,8 +94,8 @@ export default class TreeTransfer extends Component {
   changeDataSource = props => {
     const { values, dataSource } = props;
     // 有value时计算两侧的dataSource
-    const newLeftTreeDataSource = this.filterCategoryData(values, dataSource, 'filter');
-    const newRightTreeDataSource = this.filterCategoryData(values, dataSource, 'select');
+    const newLeftTreeDataSource = this.filterCategoryData(values, dataSource, 'filter'); // 左侧Tree的的展示数据
+    const newRightTreeDataSource = this.filterCategoryData(values, dataSource, 'select'); // 右侧Tree的展示数据
     this.setState({
       dataSource,
       selectValues: values,
@@ -110,7 +110,7 @@ export default class TreeTransfer extends Component {
     });
   };
 
-  // 选择时生成类目结构数据的方法(type为select时为选择的数据，type为filter为过滤掉选择的数据)
+  // 根据选择的keys(最后一级)生成类目结构数据的方法(type为select时为选择的数据，type为filter为过滤掉选择的数据)
   filterCategoryData = (selectKeys, data, type) => {
     const newData = [];
     data.forEach(item => {
@@ -158,13 +158,18 @@ export default class TreeTransfer extends Component {
     const selectDataCategory = this.filterCategoryData(keys, data, 'select'); // 选中的数据
     const changeState = direction === 'left' ? 'leftTree' : 'rightTree';
     if (rightToLeft) {
+      // rightToLeft为true时会重新计算左侧Tree的selectDataSource和filterSelectDataSource
+      const { leftTree: { checkedKeys } } = this.state;
+      const newLeftKeys = [ ...checkedKeys, ...keys ];
+      const newLeftFilterData = this.filterCategoryData(newLeftKeys, data, 'filter');
+      const newLeftSelectData = this.filterCategoryData(newLeftKeys, data, 'select');
       // 右面选中移动到左边时生成左边的数据
       this.setState({
         [changeState]: {
           ...this.state[changeState],
           dataSource: newData,
-          selectDataSource: [],
-          filterSelectDataSource: [],
+          selectDataSource: newLeftSelectData,
+          filterSelectDataSource: newLeftFilterData,
         },
       }, () => callback && callback());
     } else {
@@ -173,7 +178,6 @@ export default class TreeTransfer extends Component {
           ...this.state[changeState],
           filterSelectDataSource: newData,
           selectDataSource: selectDataCategory,
-          keys,
         },
       });
     }
@@ -182,46 +186,32 @@ export default class TreeTransfer extends Component {
   // 选中时的方法(rightToLeft表示右边移动到左边时调用该函数)
   onCheck = (keys, info, direction, rightToLeft, callback) => {
     const { dataSource } = this.props;
-    // 选择的是最后一级的key
+    // 选择的keys中是最后一级的keys
     const lastLevelKey = keys.filter(item => isLastLevelKey(dataSource, item));
-    // 选择的非最后一级的key
-    const notLastLevelKey = keys.filter(item => !isLastLevelKey(dataSource, keys));
     if (direction === 'left') {
       this.setState(
         {
           leftTree: {
             ...this.state.leftTree,
-            checkedKeys: rightToLeft ? [] : lastLevelKey,
+            // 如果rightToLeft为true时checkedKeys还是原来的checkedKeys，否则为lastLevelKey
+            checkedKeys: rightToLeft ? this.state.leftTree.checkedKeys : lastLevelKey,
+            // 如果rightToLeft为true时keys是原来的checkedKeys加selectValues，否则为lastLevelKey加selectValues
+            keys: rightToLeft ? _.uniq([ ...this.state.selectValues, ...this.state.leftTree.checkedKeys ]) : _.uniq([ ...this.state.selectValues, ...lastLevelKey ])
           },
         },
         () => {
-          // 左侧选择的产品在右侧类目自动展开
-          if (!rightToLeft) {
-            this.setState({
-              rightTree: {
-                ...this.state.rightTree,
-                expandedKeys: _.uniq([
-                  ...this.state.rightTree.expandedKeys,
-                  ...notLastLevelKey,
-                ]),
-              },
-            });
-          }
           const newKeys = _.uniq([...lastLevelKey, ...this.state.selectValues]);
           this.operationOnCheck(newKeys, dataSource, direction, rightToLeft, callback);
         }
       );
     } else {
-      // 右侧选择的产品在左侧类目自动展开
+      // 选择的是右侧的Tree时只需要改变受控的keys然后调用operationOnCheck方法
       this.setState(
         {
-          leftTree: {
-            ...this.state.leftTree,
-            expandedKeys: _.uniq([...this.state.leftTree.expandedKeys, ...notLastLevelKey]),
-          },
           rightTree: {
             ...this.state.rightTree,
             checkedKeys: lastLevelKey,
+            keys: lastLevelKey,
           },
         },
         () => this.operationOnCheck(lastLevelKey, this.state.rightTree.dataSource, direction, rightToLeft)
@@ -229,28 +219,33 @@ export default class TreeTransfer extends Component {
     }
   };
 
-  // 左向右的按钮
+  // 左向右的按钮(左侧Tree新的数据源是左侧Tree的filterSelectDataSource，右侧Tree新的数据源是左侧Tree的selectDataSource)
   leftToRight = () => {
     const { onMove } = this.props;
+    const { leftTree: { selectDataSource, filterSelectDataSource } } = this.state;
     this.setState(
       {
         selectValues: this.state.leftTree.keys,
         leftTree: {
           ...this.state.leftTree,
-          dataSource: this.state.leftTree.filterSelectDataSource,
-          keys: [],
+          dataSource: filterSelectDataSource,
           matchedKeys: [],
           checkedKeys: [],
+          filterSelectDataSource: [],
           selectDataSource: [],
         },
         rightTree: {
           ...this.state.rightTree,
-          dataSource: this.state.leftTree.selectDataSource,
-          matchedKeys: [],
+          dataSource: selectDataSource,
         },
       },
       () => {
         const { selectValues, leftTree, rightTree } = this.state;
+        // 左向右按钮点击之后，重新计算右边tree的相关state(兼容点击左向右按钮时右侧有选中项的情况)
+        if (!_.isEmpty(rightTree.checkedKeys)) {
+          this.operationOnCheck(rightTree.checkedKeys, rightTree.dataSource, 'right', false);
+        }
+        // 返回给父组件数据
         const categoryData = JSON.stringify([leftTree.dataSource, rightTree.dataSource]);
         onMove && onMove(selectValues, categoryData);
       }
@@ -273,10 +268,12 @@ export default class TreeTransfer extends Component {
           keys: [],
           matchedKeys: [],
           selectDataSource: [],
+          filterSelectDataSource: [],
           checkedKeys: [],
         },
       },
       () => {
+        // 右向左移动时，左侧的数据需要重新计算
         this.onCheck(newLeftKeys, {}, 'left', true, () => {
           const { selectValues, leftTree, rightTree } = this.state;
           const categoryData = JSON.stringify([leftTree.dataSource, rightTree.dataSource]);
@@ -327,19 +324,26 @@ export default class TreeTransfer extends Component {
     const selectAllKeys = this.getLastLevelData(this.state[operationState].dataSource).map(
       item => item.key
     );
+    // 全选右侧时所有的key
+    const allRightTreeKeys = this.getLastLevelData(this.state.rightTree.dataSource).map(
+      item => item.key
+    );
+    // 全选左侧时所有的key
     const allKeys = this.getLastLevelData(this.state.dataSource).map(item => item.key);
+    // 根据选择的方向生成对应的key
+    const generateKeys = direction === 'left' ? allKeys : allRightTreeKeys;
     this.setState({
       [operationState]: {
         ...this.state[operationState],
         selectDataSource: this.state.dataSource,
         filterSelectDataSource: [],
         checkedKeys: type === 'clear' ? [] : selectAllKeys,
-        keys: type === 'clear' ? [] : allKeys,
+        keys: type === 'clear' ? [] : generateKeys,
       },
     });
   };
 
-  // 搜索筛选
+  // 搜索筛选(设置expandedKeys和matchedKeys)
   handleSearch = (e, direction) => {
     let { value } = e.target;
     const { searchItems } = this.props;
@@ -431,15 +435,15 @@ export default class TreeTransfer extends Component {
         <div styleName="exchange-button">
           <Button
             onClick={this.leftToRight}
-            disabled={leftTree.keys.length === 0}
-            type={leftTree.keys.length !== 0 ? 'primary' : 'normal'}
+            disabled={leftTree.checkedKeys.length === 0}
+            type={leftTree.checkedKeys.length !== 0 ? 'primary' : 'normal'}
           >
             <Icon type="right" />
           </Button>
           <Button
             onClick={this.rightToLeft}
-            disabled={rightTree.keys.length === 0}
-            type={rightTree.keys.length !== 0 ? 'primary' : 'normal'}
+            disabled={rightTree.checkedKeys.length === 0}
+            type={rightTree.checkedKeys.length !== 0 ? 'primary' : 'normal'}
           >
             <Icon type="left" />
           </Button>
