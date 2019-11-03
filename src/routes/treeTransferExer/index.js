@@ -88,7 +88,6 @@ export default class TreeTransferExer extends Component {
           <TabPane tab="普通使用" key="normal">
             <TreeTransfer
               dataSource={mockData}
-              onMove={this.onMove}
               title={['左侧标题', '右侧标题']}
               onMove={this.onMove}
             />
@@ -98,7 +97,6 @@ export default class TreeTransferExer extends Component {
               dataSource={mockData}
               onMove={this.onMove}
               title={['左侧标题', '右侧标题']}
-              onMove={this.onMove}
               values={['1-0-0', '2-0-0']}
             />
           </TabPane>
