@@ -92,12 +92,47 @@ export default class TreeTransferExer extends Component {
               onMove={this.onMove}
             />
           </TabPane>
-          <TabPane tab="有初始值的使用" key="defaultKey">
+          <TabPane tab="defaultValues的使用" key="defaultValues">
+            <TreeTransfer
+              dataSource={mockData}
+              title={['左侧标题', '右侧标题']}
+              onMove={this.onMove}
+              defaultValues={['1-0-0', '2-0-0']}
+            />
+          </TabPane>
+          <TabPane tab="values的使用" key="values">
             <TreeTransfer
               dataSource={mockData}
               onMove={this.onMove}
               title={['左侧标题', '右侧标题']}
               values={['1-0-0', '2-0-0']}
+            />
+          </TabPane>
+          <TabPane tab="禁用穿梭框" key="disabled">
+            <TreeTransfer
+              dataSource={mockData}
+              title={['左侧标题', '右侧标题']}
+              onMove={this.onMove}
+              defaultValues={['1-0-0', '2-0-0']}
+              disabled
+            />
+          </TabPane>
+          <TabPane tab="左侧穿梭框禁用" key="leftDisabled">
+            <TreeTransfer
+              dataSource={mockData}
+              title={['左侧标题', '右侧标题']}
+              onMove={this.onMove}
+              defaultValues={['1-0-0', '2-0-0']}
+              leftDisabled
+            />
+          </TabPane>
+          <TabPane tab="右侧穿梭框禁用" key="rightDisabled">
+            <TreeTransfer
+              dataSource={mockData}
+              title={['左侧标题', '右侧标题']}
+              onMove={this.onMove}
+              defaultValues={['1-0-0', '2-0-0']}
+              rightDisabled
             />
           </TabPane>
         </Tabs>

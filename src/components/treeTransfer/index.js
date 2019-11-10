@@ -68,6 +68,7 @@ export default class TreeTransfer extends Component {
   };
 
   static defaultProps = {
+    dataSource: [],
     showSearch: true,
     values: [],
     searchItems: ['label', 'key'],
