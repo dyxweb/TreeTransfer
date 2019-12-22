@@ -3,158 +3,121 @@ import PropTypes from 'prop-types';
 import CSSModules from 'react-css-modules';
 import _ from 'lodash';
 import { Input, Tree, Button, Icon, Checkbox } from 'antd';
+import { isLastLevelKey, mapCategoryData, getLastLevelData, filterCategoryData } from '../../utils';
 import styles from './index.less';
 
 const { Search } = Input;
-// 判断选择的key是否为最后一层的key
-const isLastLevelKey = (dataSource, key) => {
-  let flag = false;
-  const deep = data => {
-    return data.some(item => {
-      if (item.key === key ) {
-        if (!item.children || item.children.length <= 0) {
-          flag = true;
-          return true;
-        } else {
-          return deep(item.children)
-        }
-      } else if (item.children && item.children.length > 0) {
-        return deep(item.children)
-      }
-    })
-  }
-  deep(dataSource)
-  return flag;
-};
-
-// 对dataSource进行操作(主要用于disabled)
-const mapCategoryData = categoryData => {
-  const newData = []; 
-  categoryData.forEach(item => {
-    let obj = {};
-    if (Array.isArray(item.children) && item.children.length > 0) {
-      const tempData = mapCategoryData(item.children);
-      obj = {
-        ...item, // 保留原来信息
-        children: tempData,
-        disabled: true,
-      }
-    } else {
-      obj = {
-        ...item, // 保留原来信息
-        disabled: true,
-      }
-    }
-    newData.push(obj);
-  })
-  return newData;
-}
-
 @CSSModules(styles)
 export default class TreeTransfer extends Component {
   static propTypes = {
-    dataSource: PropTypes.array.isRequired, 
+    dataSource: PropTypes.array.isRequired, // 全量的tree数据源
     values: PropTypes.array, // 受控 优先级高于defaultValues
-    onMove: PropTypes.func,
-    title: PropTypes.array.isRequired,
-    searchPlaceholder: PropTypes.array,
-    showSearch: PropTypes.bool,
-    searchItems: PropTypes.array,
-    notFoundContent: PropTypes.node,
     defaultValues: PropTypes.array, // 非受控
-    disabled: PropTypes.bool,
-    leftDisabled: PropTypes.bool,
-    rightDisabled: PropTypes.bool,
+    onMove: PropTypes.func, // 左右移动时的方法
+    title: PropTypes.array.isRequired, // 穿梭框的标题
+    showSearch: PropTypes.bool, // 是否显示搜索框
+    searchItems: PropTypes.array, // 搜索时需要匹配的搜索项的属性
+    searchPlaceholder: PropTypes.array, // 搜索矿的placeholder
+    notFoundContent: PropTypes.node, // 无数据时的文本
+    disabled: PropTypes.bool, // 是否禁用搜索框
+    leftDisabled: PropTypes.bool, // 是否禁用左侧搜索框
+    rightDisabled: PropTypes.bool, // 是否禁用右侧搜索框
   };
 
   static defaultProps = {
     dataSource: [],
-    showSearch: true,
     values: [],
+    defaultValues: [],
+    onMove: () => {},
+    title: ['左侧标题', '右侧标题'],
+    showSearch: true,
     searchItems: ['label', 'key'],
     searchPlaceholder: ['请输入', '请输入'],
     notFoundContent: '暂无数据',
     disabled: false,
     leftDisabled: false,
     rightDisabled: false,
-    defaultValues: [],
   };
+
+  // // 当传入的受控values和全量的dataSource和原来的state不同时，重新计算左右侧的数据
+  // static getDerivedStateFromProps(nextProps, prevState) {
+  //   const { dataSource, values, disabled, leftDisabled, rightDisabled } = nextProps;
+  //   if (!_.isEqual(values, prevState.selectValues) || !_.isEqual(dataSource, prevState.dataSource)) {
+  //     const newLeftTreeDataSource = filterCategoryData(values, dataSource, 'filter', disabled || leftDisabled); // 左侧Tree的的展示数据
+  //     const newRightTreeDataSource = filterCategoryData(values, dataSource, 'select', disabled || rightDisabled); // 右侧Tree的展示数据
+  //     return {
+  //       selectValues: values,
+  //       leftTree: {
+  //         ...prevState.leftTree,
+  //         dataSource: newLeftTreeDataSource,
+  //       },
+  //       rightTree: {
+  //         ...prevState.rightTree,
+  //         dataSource: newRightTreeDataSource,
+  //       },
+  //     };
+  //   } else {
+  //     return null;
+  //   }
+  // }
 
   constructor(props) {
     super(props);
     this.state = {
       dataSource: this.props.dataSource, // 全量的数据
-      selectValues: this.props.defaultValues, // 最后选择的values
+      selectValues: (this.props.values && !_.isEmpty(this.props.values)) ? this.props.values : this.props.defaultValues, // 最后选择到右侧的values(values的优先级高于defaultValues)
       leftTree: {
-        // 左侧全量数据的tree
+        // 左侧剩余的数据
         dataSource: [], // 展示的数据
         selectDataSource: [], // 选中的产品数据
         filterSelectDataSource: [], // 去除选中的产品数据
         keys: [], // 选中的keys(包括已经选择移动到右边的keys)
+        checkedKeys: [], // 受控选中的keys
         expandedKeys: [], // 展开的项
         autoExpandParent: true, // 自动展开父节点
         matchedKeys: [], // 匹配搜索内容的数据
-        checkedKeys: [], // 受控选中的keys
       },
       rightTree: {
-        // 右侧已选择的产品的数据
+        // 右侧已选择的数据
         dataSource: [], // 展示的数据
         selectDataSource: [], // 选中的产品数据
         filterSelectDataSource: [], // 去除选中的产品数据
         keys: [], // 选中的keys(和checkedKeys相同)
+        checkedKeys: [], // 受控选中的keys
         expandedKeys: [], // 展开的项
         autoExpandParent: true, // 自动展开父节点
         matchedKeys: [], // 匹配搜索内容的数据
-        checkedKeys: [], // 受控选中的keys
       },
     };
   }
 
   componentDidMount() {
-    const { values, leftDisabled, rightDisabled, disabled } = this.props;
-    const { selectValues } = this.state;
-    let { dataSource } = this.props;
-    if (disabled) {
-      dataSource = mapCategoryData(dataSource);
-    }
-    // 设置dataSource以及计算两侧tree的数据
-    const newLeftTreeDataSource = this.filterCategoryData(selectValues, dataSource, 'filter', disabled || leftDisabled); // 左侧Tree的的展示数据
-    const newRightTreeDataSource = this.filterCategoryData(selectValues, dataSource, 'select', disabled || rightDisabled); // 右侧Tree的展示数据
-    this.setState({
-      dataSource,
-      leftTree: {
-        ...this.state.leftTree,
-        dataSource: newLeftTreeDataSource,
-      },
-      rightTree: {
-        ...this.state.rightTree,
-        dataSource: newRightTreeDataSource,
-      },
-    });
-    // values不为空时重新计算两侧tree数据(受控的values)
-    if (!_.isEmpty(values)) {
-      this.changeDataSource(this.props);
-    }
+    this.changeDataSource(this.props);
   }
 
-  componentWillReceiveProps(newProps) {
-    // 编辑状态下生成树形数据结构（当选择项和数据源改变时重新计算数据）
-    if (!_.isEqual(newProps.values, this.props.values) ||
-      !_.isEqual(newProps.dataSource, this.props.dataSource)
+  //  当传入的受控values和全量的dataSource改变时，重新计算左右侧的数据
+  UNSAFE_componentWillReceiveProps(nextProps) {
+    if (!_.isEqual(nextProps.values, this.props.values) ||
+      !_.isEqual(nextProps.dataSource, this.props.dataSource)
     ) {
-      this.changeDataSource(newProps);
+      this.changeDataSource(nextProps);
     }
   }
 
-  // 初始的数据赋值
+  // 初始的数据赋值(根据selectValues以及dataSources计算左右侧的展示数据，同时会处理disabled属性)
   changeDataSource = props => {
-    console.log('rece');
-    const { dataSource, values, disabled, leftDisabled, rightDisabled } = props;
+    const { selectValues, dataSource } = this.state;
+    const { disabled, leftDisabled, rightDisabled } = props;
+    let newDataSource = _.cloneDeep(dataSource); // 新的全量数据
+    // 如果设置disabled时将数据源全部disabled(数据结构参考Tree组件)
+    if (disabled) {
+      newDataSource = mapCategoryData(dataSource);
+    }
     // 有value时计算两侧的dataSource
-    const newLeftTreeDataSource = this.filterCategoryData(values, dataSource, 'filter', disabled || leftDisabled); // 左侧Tree的的展示数据
-    const newRightTreeDataSource = this.filterCategoryData(values, dataSource, 'select', disabled || rightDisabled); // 右侧Tree的展示数据
+    const newLeftTreeDataSource = filterCategoryData(selectValues, dataSource, 'filter', disabled || leftDisabled); // 左侧Tree的的展示数据
+    const newRightTreeDataSource = filterCategoryData(selectValues, dataSource, 'select', disabled || rightDisabled); // 右侧Tree的展示数据
     this.setState({
-      selectValues: values,
+      dataSource: newDataSource,
       leftTree: {
         ...this.state.leftTree,
         dataSource: newLeftTreeDataSource,
@@ -165,63 +128,19 @@ export default class TreeTransfer extends Component {
       },
     });
   };
-
-  // 根据选择的keys(最后一级)生成类目结构数据的方法(type为select时为选择的数据，type为filter为过滤掉选择的数据)
-  filterCategoryData = (selectKeys, data, type, disabled) => {
-    const newData = [];
-    data.forEach(item => {
-      let obj = {};
-      if (item.children && item.children.length > 0) {
-        const tempData = this.filterCategoryData(selectKeys, item.children, type, disabled);
-        obj = {
-          ...item,
-          children: tempData,
-          disabled,
-        };
-        if (!_.isEmpty(obj.children)) {
-          newData.push(obj);
-        }
-      } else if (
-        type === 'select' ? selectKeys.includes(item.key) : !selectKeys.includes(item.key)
-      ) {
-        obj = {
-          ...item,
-          disabled,
-        };
-        newData.push(obj);
-      }
-    });
-    return newData;
-  };
-
-  // 多层级数据获得最后一层数据
-  getLastLevelData = categoryData => {
-    const newData = [];
-    function deep(data) {
-      data.forEach(item => {
-        if (!item.children || _.isEmpty(item.children)) {
-          newData.push(item);
-        } else {
-          deep(item.children);
-        }
-      });
-    }
-    deep(categoryData);
-    return newData;
-  }
 
   // 选择checkbox时改变状态的方法
   operationOnCheck = (keys, data, direction, rightToLeft, callback) => {
     const { leftDisabled, rightDisabled } = this.props;
-    const newData = this.filterCategoryData(keys, data, 'filter', rightToLeft ? leftDisabled : false); // 去除选中的数据
-    const selectDataCategory = this.filterCategoryData(keys, data, 'select', rightDisabled); // 选中的数据
+    const newData = filterCategoryData(keys, data, 'filter', rightToLeft ? leftDisabled : false); // 去除选中的数据
+    const selectDataCategory = filterCategoryData(keys, data, 'select', rightDisabled); // 选中的数据
     const changeState = direction === 'left' ? 'leftTree' : 'rightTree';
     if (rightToLeft) {
       // rightToLeft为true时会重新计算左侧Tree的selectDataSource和filterSelectDataSource
       const { leftTree: { checkedKeys } } = this.state;
       const newLeftKeys = [ ...checkedKeys, ...keys ];
-      const newLeftFilterData = this.filterCategoryData(newLeftKeys, data, 'filter', leftDisabled);
-      const newLeftSelectData = this.filterCategoryData(newLeftKeys, data, 'select', leftDisabled);
+      const newLeftFilterData = filterCategoryData(newLeftKeys, data, 'filter', leftDisabled);
+      const newLeftSelectData = filterCategoryData(newLeftKeys, data, 'select', leftDisabled);
       // 右面选中移动到左边时生成左边的数据
       this.setState({
         [changeState]: {
@@ -342,17 +261,19 @@ export default class TreeTransfer extends Component {
     );
   };
 
-  // 渲染transfer的checkBox
+  // 渲染transfer的全选checkBox
   renderCheckBox = direction => {
     const { disabled, leftDisabled, rightDisabled } = this.props;
     const directionDisabled = direction === 'left' ? leftDisabled : rightDisabled;
     const { leftTree, rightTree } = this.state;
     const operationState = direction === 'left' ? leftTree : rightTree;
-    const allLength = this.getLastLevelData(operationState.dataSource).length;
-    const selectLength = operationState.checkedKeys.length;
+    const allLength = getLastLevelData(operationState.dataSource).length; // 所有最后一项的数据长度
+    const selectLength = operationState.checkedKeys.length; // 所选择的数据长度
+    const checkAllDisabled = disabled || directionDisabled || _.isEmpty(operationState.dataSource); // 全选的checkbox是否disabled
     // 全选或者全不选的状态
     const type = allLength === selectLength ? 'clear' : 'checkAll';
     if (selectLength === 0) {
+      // 非全选状态
       return (
         <div>
           <Checkbox
@@ -360,12 +281,13 @@ export default class TreeTransfer extends Component {
             indeterminate={false}
             onClick={() => this.checkAll(direction, type)}
             style={{ marginRight: '6px' }}
-            disabled={disabled || directionDisabled}
+            disabled={checkAllDisabled}
           />
           {`${allLength}项`}
         </div>
       );
     } else {
+      // 全选状态
       return (
         <div>
           <Checkbox
@@ -385,15 +307,15 @@ export default class TreeTransfer extends Component {
     const { leftDisabled, rightDisabled } = this.props;
     const directionDisabled = direction === 'left' ? rightDisabled : leftDisabled;
     const operationState = direction === 'left' ? 'leftTree' : 'rightTree';
-    const selectAllKeys = this.getLastLevelData(this.state[operationState].dataSource).map(
+    const selectAllKeys = getLastLevelData(this.state[operationState].dataSource).map(
       item => item.key
     );
     // 全选右侧时所有的key
-    const allRightTreeKeys = this.getLastLevelData(this.state.rightTree.dataSource).map(
+    const allRightTreeKeys = getLastLevelData(this.state.rightTree.dataSource).map(
       item => item.key
     );
     // 全选左侧时所有的key
-    const allKeys = this.getLastLevelData(this.state.dataSource).map(item => item.key);
+    const allKeys = getLastLevelData(this.state.dataSource).map(item => item.key);
     // 根据选择的方向生成对应的key
     const generateKeys = direction === 'left' ? allKeys : allRightTreeKeys;
     this.setState({
