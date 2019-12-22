@@ -40,25 +40,9 @@ module.exports = {
           'postcss-loader',
         ] 
       },
-      {
-        test: /.(png|jpg|svg|gif)$/, // 正则匹配图片格式名
-        use: [
-          'cache-loader',
-          {
-            loader: 'url-loader', // 使用url-loader
-            options: {
-              limit: 1000, // 限制只有小于1kb的图片才转为base64，例子图片为1.47kb,所以不会被转化
-              outputPath: './src/public/images' // 设置打包后图片存放的文件夹名称
-            }
-          }
-        ]
-      }
     ]
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(), //热加载插件
-    new webpack.DefinePlugin({
-      'NAME': JSON.stringify('dyx'),
-    }), // 定义全局的变量
   ]
 }
