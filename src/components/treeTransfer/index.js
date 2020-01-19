@@ -26,7 +26,7 @@ export default class TreeTransfer extends Component {
 
   static defaultProps = {
     dataSource: [],
-    values: [],
+    values: undefined,
     defaultValues: [],
     onMove: () => {},
     title: ['左侧标题', '右侧标题'],
@@ -39,33 +39,11 @@ export default class TreeTransfer extends Component {
     rightDisabled: false,
   };
 
-  // // 当传入的受控values和全量的dataSource和原来的state不同时，重新计算左右侧的数据
-  // static getDerivedStateFromProps(nextProps, prevState) {
-  //   const { dataSource, values, disabled, leftDisabled, rightDisabled } = nextProps;
-  //   if (!_.isEqual(values, prevState.selectValues) || !_.isEqual(dataSource, prevState.dataSource)) {
-  //     const newLeftTreeDataSource = filterCategoryData(values, dataSource, 'filter', disabled || leftDisabled); // 左侧Tree的的展示数据
-  //     const newRightTreeDataSource = filterCategoryData(values, dataSource, 'select', disabled || rightDisabled); // 右侧Tree的展示数据
-  //     return {
-  //       selectValues: values,
-  //       leftTree: {
-  //         ...prevState.leftTree,
-  //         dataSource: newLeftTreeDataSource,
-  //       },
-  //       rightTree: {
-  //         ...prevState.rightTree,
-  //         dataSource: newRightTreeDataSource,
-  //       },
-  //     };
-  //   } else {
-  //     return null;
-  //   }
-  // }
-
   constructor(props) {
     super(props);
     this.state = {
       dataSource: this.props.dataSource, // 全量的数据
-      selectValues: (this.props.values && !_.isEmpty(this.props.values)) ? this.props.values : this.props.defaultValues, // 最后选择到右侧的values(values的优先级高于defaultValues)
+      selectValues: this.props.values ? this.props.values : this.props.defaultValues, // 最后选择到右侧的values(values的优先级高于defaultValues)
       leftTree: {
         // 左侧剩余的数据
         dataSource: [], // 展示的数据
@@ -92,30 +70,34 @@ export default class TreeTransfer extends Component {
   }
 
   componentDidMount() {
-    this.changeDataSource(this.props);
+    this.changeDataSource(this.props, this.state.selectValues);
   }
 
   //  当传入的受控values和全量的dataSource改变时，重新计算左右侧的数据
   UNSAFE_componentWillReceiveProps(nextProps) {
-    if (!_.isEqual(nextProps.values, this.props.values) ||
-      !_.isEqual(nextProps.dataSource, this.props.dataSource)
-    ) {
-      this.changeDataSource(nextProps);
+    const { values, dataSource } = nextProps;
+    const { selectValues } = this.state;
+    // dataSource数据源改变时重新计算
+    if (!_.isEqual(dataSource, this.props.dataSource)) {
+      this.changeDataSource(nextProps, selectValues);
+    }
+    // 受控的values改变时
+    if (values && !_.isEqual(values, this.state.selectValues)) {
+      this.changeDataSource(nextProps, nextProps.values);
     }
   }
 
   // 初始的数据赋值(根据selectValues以及dataSources计算左右侧的展示数据，同时会处理disabled属性)
-  changeDataSource = props => {
-    const { selectValues, dataSource } = this.state;
-    const { disabled, leftDisabled, rightDisabled } = props;
+  changeDataSource = (props, filterValues) => {
+    const { dataSource, disabled, leftDisabled, rightDisabled } = props;
     let newDataSource = _.cloneDeep(dataSource); // 新的全量数据
     // 如果设置disabled时将数据源全部disabled(数据结构参考Tree组件)
     if (disabled) {
       newDataSource = mapCategoryData(dataSource);
     }
     // 有value时计算两侧的dataSource
-    const newLeftTreeDataSource = filterCategoryData(selectValues, dataSource, 'filter', disabled || leftDisabled); // 左侧Tree的的展示数据
-    const newRightTreeDataSource = filterCategoryData(selectValues, dataSource, 'select', disabled || rightDisabled); // 右侧Tree的展示数据
+    const newLeftTreeDataSource = filterCategoryData(filterValues, newDataSource, 'filter', disabled || leftDisabled); // 左侧Tree的的展示数据
+    const newRightTreeDataSource = filterCategoryData(filterValues, newDataSource, 'select', disabled || rightDisabled); // 右侧Tree的展示数据
     this.setState({
       dataSource: newDataSource,
       leftTree: {

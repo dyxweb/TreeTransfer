@@ -77,11 +77,21 @@ const mockData = [
 ];
 @CSSModules(styles)
 export default class TreeTransferExer extends Component {
+
+  state= {
+    values: ['1-0-0', '2-0-0'], // 受控使用时的values
+  }
+
   onMove = (keys, info) => {
+    this.setState({
+      values: keys,
+    });
     console.log(keys);
     console.log(JSON.parse(info));
   }
+
   render() {
+    const { values } = this.state;
     return (
       <div styleName="container">
         <Tabs defaultActiveKey="normal">
@@ -105,7 +115,7 @@ export default class TreeTransferExer extends Component {
               dataSource={mockData}
               onMove={this.onMove}
               title={['左侧标题', '右侧标题']}
-              values={['1-0-0', '2-0-0']}
+              values={values}
             />
           </TabPane>
           <TabPane tab="禁用穿梭框" key="disabled">
@@ -131,7 +141,7 @@ export default class TreeTransferExer extends Component {
               dataSource={mockData}
               title={['左侧标题', '右侧标题']}
               onMove={this.onMove}
-              defaultValues={['1-0-0', '2-0-0']}
+              values={values}
               rightDisabled
             />
           </TabPane>
