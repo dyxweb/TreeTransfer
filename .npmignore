@@ -1,0 +1,12 @@
+# .npmignore 
+src
+config
+example
+public
+package-lock.json
+postcss.config.js
+README.md
+treeTransfer.gif
+.babelrc
+.gitignore
+

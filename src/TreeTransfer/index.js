@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import CSSModules from 'react-css-modules';
 import _ from 'lodash';
 import { Input, Tree, Button, Icon, Checkbox } from 'antd';
-import { isLastLevelKey, mapCategoryData, getLastLevelData, filterCategoryData } from '../../utils';
+import { isLastLevelKey, mapCategoryData, getLastLevelData, filterCategoryData } from '../utils';
 import styles from './index.less';
 
 const { Search } = Input;

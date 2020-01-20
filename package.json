@@ -1,14 +1,19 @@
 {
-  "name": "treetransfer",
-  "version": "1.0.0",
+  "name": "transfer-tree-antd",
+  "version": "0.1.7",
   "description": "简单的tree形式的穿梭框",
+  "main": "lib/index.js",
+  "license": "ISC",
+  "author": "dyx",
   "scripts": {
     "build": "webpack --config ./config/webpack.prod.js --mode production",
-    "start": "webpack-dev-server --open --config ./config/webpack.dev.js --mode development"
+    "start": "webpack-dev-server --open --config ./config/webpack.dev.js --mode development",
+    "transpile": "babel src -d lib --copy-files",
+    "prepublishOnly": "npm run transpile"
   },
-  "author": "dyx",
   "devDependencies": {
     "autoprefixer": "^9.6.1",
+    "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.5",
     "babel-plugin-import": "^1.12.0",

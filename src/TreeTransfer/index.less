@@ -1,0 +1,50 @@
+.tree-transfer {
+  display: flex;
+  .transfer-box {
+    display: flex;
+    flex-direction: column;
+    height: 265px;
+    min-width: 225px;
+    border: 1px solid #A8C6DF;
+    .title {
+      padding-left: 16px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #A8C6DF;
+      background: #FAFBFC;
+      line-height: 32px;
+    }
+    .search-box {
+      display: flex;
+      justify-content: center;
+    }
+    .tree-box {
+      flex-grow: 1;
+      padding-left: 4px;
+      height: 148px;
+      overflow: auto;
+    }
+    .no-data {
+      flex-grow: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 148px;
+    }
+    .bottom-select {
+      padding-left: 16px;
+      border-top: 1px solid #A8C6DF;
+      line-height: 32px;
+    }
+  }
+  .exchange-button {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 0 24px;
+    :global {
+      .ant-btn {
+        margin-bottom: 8px;
+      }
+    }
+  }
+}

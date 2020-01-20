@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import CSSModules from 'react-css-modules';
 import { Tabs } from 'antd';
-import TreeTransfer from '../../components/TreeTransfer'
+import TreeTransfer from '../../src/index.js'
 import styles from './index.less';
 
 const { TabPane } = Tabs;

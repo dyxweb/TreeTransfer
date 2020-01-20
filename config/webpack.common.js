@@ -2,9 +2,9 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
-  entry: "./src/index.js",  //入口文件
+  entry: "./example/index.js",  //入口文件
   output: {
-    path: path.resolve(__dirname, '../src/public'),
+    path: path.resolve(__dirname, '../public'),
     filename: "bundle.js" //打包后输出文件的文件名
   },
   module: {
