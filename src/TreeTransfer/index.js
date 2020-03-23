@@ -74,16 +74,16 @@ export default class TreeTransfer extends Component {
   }
 
   //  当传入的受控values和全量的dataSource改变时，重新计算左右侧的数据
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    const { values, dataSource } = nextProps;
+  componentDidUpdate(prevProps) {
+    const { values, dataSource } = this.props;
     const { selectValues } = this.state;
     // dataSource数据源改变时重新计算
-    if (!_.isEqual(dataSource, this.props.dataSource)) {
-      this.changeDataSource(nextProps, selectValues);
+    if (!_.isEqual(dataSource, prevProps.dataSource)) {
+      this.changeDataSource(this.props, selectValues);
     }
     // 受控的values改变时
-    if (values && !_.isEqual(values, this.state.selectValues)) {
-      this.changeDataSource(nextProps, nextProps.values);
+    if (values && !_.isEqual(values, prevProps.values)) {
+      this.changeDataSource(this.props, values);
     }
   }
 
