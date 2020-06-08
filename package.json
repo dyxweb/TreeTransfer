@@ -1,10 +1,19 @@
 {
   "name": "transfer-tree-antd",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "简单的tree形式的穿梭框",
   "main": "lib/index.js",
   "license": "ISC",
-  "author": "dyx",
+  "author": "dyxweb",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dyxweb/TreeTransfer"
+  },
+  "keywords": [
+    "react",
+    "antd",
+    "treeTransfer"
+  ],
   "scripts": {
     "build": "webpack --config ./config/webpack.prod.js --mode production",
     "start": "webpack-dev-server --open --config ./config/webpack.dev.js --mode development",
@@ -40,8 +49,6 @@
     "lodash": "^4.17.11",
     "prop-types": "^15.7.2",
     "react": "^16.4.2",
-    "react-css-modules": "^4.7.11",
-    "react-dom": "^16.4.2",
-    "react-router-dom": "^4.3.1"
+    "react-dom": "^16.4.2"
   }
 }

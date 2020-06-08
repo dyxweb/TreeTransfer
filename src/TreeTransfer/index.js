@@ -1,13 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import CSSModules from 'react-css-modules';
 import _ from 'lodash';
 import { Input, Tree, Button, Icon, Checkbox } from 'antd';
 import { isLastLevelKey, mapCategoryData, getLastLevelData, filterCategoryData } from '../utils';
-import styles from './index.less';
+import './index.less';
 
 const { Search } = Input;
-@CSSModules(styles)
 export default class TreeTransfer extends Component {
   static propTypes = {
     dataSource: PropTypes.array.isRequired, // 全量的tree数据源
@@ -369,11 +367,11 @@ export default class TreeTransfer extends Component {
     const rightFilterTreeNode =
       node => rightTree.matchedKeys && rightTree.matchedKeys.indexOf(node.props.eventKey) > -1;
     return (
-      <div styleName="tree-transfer">
-        <div styleName="transfer-box">
-          <div styleName="title">{_.get(title, 0, '选择框')}</div>
+      <div className="dyx-tree-transfer">
+        <div className="dyx-transfer-box">
+          <div className="dyx-transfer-box-title">{_.get(title, 0, '选择框')}</div>
           {showSearch && (
-            <div styleName="search-box">
+            <div className="dyx-transfer-search">
               <Search
                 style={{ width: '95%', marginBottom: '10px' }}
                 onChange={e => this.handleSearch(e, 'left')}
@@ -382,9 +380,9 @@ export default class TreeTransfer extends Component {
             </div>
           )}
           {_.isEmpty(leftTree.dataSource) ? (
-            <div styleName="no-data">{notFoundContent}</div>
+            <div className="dyx-transfer-no-data">{notFoundContent}</div>
           ) : (
-            <div styleName="tree-box">
+            <div className="dyx-transfer-tree">
               <Tree
                 expandedKeys={leftTree.expandedKeys}
                 autoExpandParent={leftTree.autoExpandParent}
@@ -398,9 +396,9 @@ export default class TreeTransfer extends Component {
               />
             </div>
           )}
-          <div styleName="bottom-select">{this.renderCheckBox('left')}</div>
+          <div className="dyx-transfer-bottom-select">{this.renderCheckBox('left')}</div>
         </div>
-        <div styleName="exchange-button">
+        <div className="dyx-transfer-exchange">
           <Button
             onClick={this.leftToRight}
             disabled={leftTree.checkedKeys.length === 0}
@@ -417,10 +415,10 @@ export default class TreeTransfer extends Component {
           </Button>
         </div>
         {/* 右侧tree */}
-        <div styleName="transfer-box">
-          <div styleName="title">{_.get(title, 1, '已选择')}</div>
+        <div className="dyx-transfer-box">
+          <div className="dyx-transfer-box-title">{_.get(title, 1, '已选择')}</div>
           {showSearch && (
-            <div styleName="search-box">
+            <div className="dyx-transfer-search">
               <Search
                 style={{ width: '95%', marginBottom: '10px' }}
                 onChange={e => this.handleSearch(e, 'right')}
@@ -429,9 +427,9 @@ export default class TreeTransfer extends Component {
             </div>
           )}
           {_.isEmpty(rightTree.dataSource) ? (
-            <div styleName="no-data">{notFoundContent}</div>
+            <div className="dyx-transfer-no-data">{notFoundContent}</div>
           ) : (
-            <div styleName="tree-box">
+            <div className="dyx-transfer-tree">
               <Tree
                 expandedKeys={rightTree.expandedKeys}
                 autoExpandParent={rightTree.autoExpandParent}
@@ -445,7 +443,7 @@ export default class TreeTransfer extends Component {
               />
             </div>
           )}
-          <div styleName="bottom-select">{this.renderCheckBox('right')}</div>
+          <div className="dyx-transfer-bottom-select">{this.renderCheckBox('right')}</div>
         </div>
       </div>
     );

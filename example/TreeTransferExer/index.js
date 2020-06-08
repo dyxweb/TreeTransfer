@@ -1,8 +1,7 @@
 import React, { Component } from "react";
-import CSSModules from 'react-css-modules';
 import { Tabs } from 'antd';
 import TreeTransfer from '../../src/index.js'
-import styles from './index.less';
+import './index.less';
 
 const { TabPane } = Tabs;
 const mockData = [
@@ -75,7 +74,6 @@ const mockData = [
     ],
   }
 ];
-@CSSModules(styles)
 export default class TreeTransferExer extends Component {
 
   state= {
@@ -93,7 +91,7 @@ export default class TreeTransferExer extends Component {
   render() {
     const { values } = this.state;
     return (
-      <div styleName="container">
+      <div className="container">
         <Tabs defaultActiveKey="normal">
           <TabPane tab="普通使用" key="normal">
             <TreeTransfer
