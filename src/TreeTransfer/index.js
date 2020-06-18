@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import _ from 'lodash';
 import { Input, Tree, Button, Icon, Checkbox } from 'antd';
 import { isLastLevelKey, mapCategoryData, getLastLevelData, filterCategoryData } from '../utils';
-import './index.less';
+import './index.css';
 
 const { Search } = Input;
 export default class TreeTransfer extends Component {

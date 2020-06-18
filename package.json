@@ -1,6 +1,6 @@
 {
   "name": "transfer-tree-antd",
-  "version": "0.1.9",
+  "version": "0.1.15",
   "description": "简单的tree形式的穿梭框",
   "main": "lib/index.js",
   "license": "ISC",

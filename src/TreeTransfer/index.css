@@ -1,0 +1,57 @@
+.dyx-tree-transfer {
+  width: 100%;
+  display: flex;
+}
+
+.dyx-transfer-box {
+  display: flex;
+  flex-direction: column;
+  height: 265px;
+  min-width: 225px;
+  border: 1px solid #A8C6DF;
+}
+
+.dyx-transfer-box-title {
+  padding-left: 16px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #A8C6DF;
+  background: #FAFBFC;
+  line-height: 32px;
+}
+
+.dyx-transfer-search {
+  display: flex;
+  justify-content: center;
+}
+
+.dyx-transfer-tree {
+  flex-grow: 1;
+  padding-left: 4px;
+  height: 148px;
+  overflow: auto;
+}
+
+.dyx-transfer-no-data {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 148px;
+}
+
+.dyx-transfer-exchange {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 0 24px;
+}
+
+.dyx-transfer-exchange .ant-btn {
+  margin-bottom: 8px;
+}
+
+.dyx-transfer-bottom-select {
+  padding-left: 16px;
+  border-top: 1px solid #A8C6DF;
+  line-height: 32px;
+}
