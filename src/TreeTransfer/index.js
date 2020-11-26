@@ -2,24 +2,24 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import { Input, Tree, Button, Icon, Checkbox } from 'antd';
-import { isLastLevelKey, mapCategoryData, getLastLevelData, filterCategoryData } from '../utils';
+import { isLastLevelKey, disabledCategoryData, getLastLevelData, filterCategoryData } from '../utils';
 import './index.css';
 
 const { Search } = Input;
 export default class TreeTransfer extends Component {
   static propTypes = {
     dataSource: PropTypes.array.isRequired, // 全量的tree数据源
-    values: PropTypes.array, // 受控 优先级高于defaultValues
-    defaultValues: PropTypes.array, // 非受控
-    onMove: PropTypes.func, // 左右移动时的方法
     title: PropTypes.array.isRequired, // 穿梭框的标题
+    defaultValues: PropTypes.array, // 非受控
+    values: PropTypes.array, // 受控 优先级高于defaultValues
+    disabled: PropTypes.bool, // 是否禁用搜索框
+    leftDisabled: PropTypes.bool, // 是否禁用左侧搜索框
+    rightDisabled: PropTypes.bool, // 是否禁用右侧搜索框
     showSearch: PropTypes.bool, // 是否显示搜索框
     searchItems: PropTypes.array, // 搜索时需要匹配的搜索项的属性
     searchPlaceholder: PropTypes.array, // 搜索矿的placeholder
     notFoundContent: PropTypes.node, // 无数据时的文本
-    disabled: PropTypes.bool, // 是否禁用搜索框
-    leftDisabled: PropTypes.bool, // 是否禁用左侧搜索框
-    rightDisabled: PropTypes.bool, // 是否禁用右侧搜索框
+    onMove: PropTypes.func, // 左右移动时的方法
   };
 
   static defaultProps = {
@@ -91,7 +91,7 @@ export default class TreeTransfer extends Component {
     let newDataSource = _.cloneDeep(dataSource); // 新的全量数据
     // 如果设置disabled时将数据源全部disabled(数据结构参考Tree组件)
     if (disabled) {
-      newDataSource = mapCategoryData(dataSource);
+      newDataSource = disabledCategoryData(dataSource);
     }
     // 有value时计算两侧的dataSource
     const newLeftTreeDataSource = filterCategoryData(filterValues, newDataSource, 'filter', disabled || leftDisabled); // 左侧Tree的的展示数据
@@ -301,7 +301,7 @@ export default class TreeTransfer extends Component {
     this.setState({
       [operationState]: {
         ...this.state[operationState],
-        selectDataSource: directionDisabled ? mapCategoryData(this.state.dataSource) : this.state.dataSource,
+        selectDataSource: directionDisabled ? disabledCategoryData(this.state.dataSource) : this.state.dataSource,
         filterSelectDataSource: [],
         checkedKeys: type === 'clear' ? [] : selectAllKeys,
         keys: type === 'clear' ? [] : generateKeys,

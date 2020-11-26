@@ -20,12 +20,12 @@ export const isLastLevelKey = (dataSource, key) => {
 };
 
 // 对dataSource进行操作(主要用于disabled)
-export const mapCategoryData = categoryData => {
+export const disabledCategoryData = categoryData => {
   const newData = []; 
   categoryData.forEach(item => {
     let obj = {};
     if (Array.isArray(item.children) && item.children.length > 0) {
-      const tempData = mapCategoryData(item.children);
+      const tempData = disabledCategoryData(item.children);
       obj = {
         ...item, // 保留原来信息
         children: tempData,
