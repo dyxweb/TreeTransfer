@@ -98,6 +98,7 @@ export default class TreeTransfer extends Component {
     const newRightTreeDataSource = filterCategoryData(filterValues, newDataSource, 'select', disabled || rightDisabled); // 右侧Tree的展示数据
     this.setState({
       dataSource: newDataSource,
+      selectValues: filterValues,
       leftTree: {
         ...this.state.leftTree,
         dataSource: newLeftTreeDataSource,

@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Tabs } from 'antd';
+import { Tabs, Button } from 'antd';
 import TreeTransfer from '../../src/index.js'
 import './index.less';
 
@@ -88,6 +88,12 @@ export default class TreeTransferExer extends Component {
     console.log(JSON.parse(info));
   }
 
+  changeValues = () => {
+    this.setState({
+      values: ['1-0-1', '2-0-1'],
+    });
+  }
+
   render() {
     const { values } = this.state;
     return (
@@ -115,6 +121,7 @@ export default class TreeTransferExer extends Component {
               title={['左侧标题', '右侧标题']}
               values={values}
             />
+            <Button onClick={this.changeValues}>changeState</Button>
           </TabPane>
           <TabPane tab="禁用穿梭框" key="disabled">
             <TreeTransfer
