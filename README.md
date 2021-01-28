@@ -24,7 +24,11 @@
 ![简单示例](./treeTransfer.gif "简单示例")
 
 **简单使用**
+> npm install transfer-tree-antd --save
 ```
+import React, { Component } from 'react';
+import TreeTransfer from 'transfer-tree-antd';
+
 const mockData = [
   {
     "title": '1',
@@ -96,14 +100,22 @@ const mockData = [
   }
 ];
 
-onMove = (keys, info) => {
-  console.log(keys);
-  console.log(JSON.parse(info));
+class App extends Component {
+  onMove = (keys, info) => {
+    console.log(keys);
+    console.log(JSON.parse(info));
+  }
+ 
+  render() {
+    return (
+      <TreeTransfer
+        dataSource={mockData}
+        title={['左侧标题', '右侧标题']}
+        onMove={this.onMove}
+      />
+    )
+  }
 }
-
-<TreeTransfer
-  dataSource={mockData}
-  title={['左侧标题', '右侧标题']}
-  onMove={this.onMove}
-/>
+ 
+render(<App />, document.querySelector('#app'));
 ```
