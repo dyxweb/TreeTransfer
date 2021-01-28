@@ -13,10 +13,7 @@ module.exports = {
         test: /(.jsx|.js)$/, 
         use: [
           'cache-loader',
-          {
-            loader: "babel-loader",
-            options: { "plugins": [ ["import", { "libraryName": "antd", "libraryDirectory": "es", "style": "css" }] ] }
-          },
+          'babel-loader'
         ],
         exclude: /node_modules/
       },
